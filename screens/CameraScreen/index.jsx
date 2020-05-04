@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import _debounce from "lodash/debounce";
 import {
 	Text,
 	StyleSheet,
@@ -43,10 +44,10 @@ export default function CameraScreen({ navigation }) {
 	}, []);
 
 	const handleBarCodeScanned = async ({ type, data }) => {
-		if (!scanned) {
-			const item = await ItemModel.findItemByVendor(data);
+		setScanned(true);
+		const item = await ItemModel.findItemByVendor(data);
+		if (item) {
 			setLastScannedItem(item);
-			setScanned(true);
 			setBasket((oldBasket) => [...oldBasket, item]);
 		}
 	};
@@ -96,7 +97,7 @@ export default function CameraScreen({ navigation }) {
 				<SuccessBuyNotification
 					name={lastScannedItem.name}
 					price={lastScannedItem.price}
-					visible={scanned}
+					visible={scanned && lastScannedItem.name !== null}
 					onContinue={onContinue}
 				/>
 			</Content>

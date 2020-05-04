@@ -6,6 +6,9 @@ import QRCode from "react-native-qrcode-svg";
 const { height, width } = Dimensions.get("window");
 
 const CodeScreen = ({ route, navigation }) => {
+	const onError = (e) => {
+		alert(e);
+	};
 	return (
 		<Container>
 			<Content padder>
@@ -16,6 +19,7 @@ const CodeScreen = ({ route, navigation }) => {
 						color={"black"}
 						value={{ data: route.params.codeData }.toString()}
 						// value="test value"
+						onError={onError}
 					/>
 				</View>
 			</Content>
