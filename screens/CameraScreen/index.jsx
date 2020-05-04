@@ -21,6 +21,7 @@ import {
 } from "native-base";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import SuccessBuyNotification from "../../components/SuccessBuyNotification";
+import ItemModel from "../../models/ItemModel";
 
 const { width, height } = Dimensions.get("window");
 const qrSize = width * 0.7;
@@ -28,6 +29,11 @@ const qrSize = width * 0.7;
 export default function CameraScreen({ navigation }) {
 	const [hasPermission, setHasPermission] = useState(null);
 	const [scanned, setScanned] = useState(false);
+	const [lastScannedItem, setLastScannedItem] = useState({
+		name: "",
+		price: "",
+	});
+	const [basket, setBasket] = useState([]);
 
 	useEffect(() => {
 		(async () => {
@@ -36,9 +42,17 @@ export default function CameraScreen({ navigation }) {
 		})();
 	}, []);
 
-	const handleBarCodeScanned = ({ type, data }) => {
-		setScanned(true);
-		alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+	const handleBarCodeScanned = async ({ type, data }) => {
+		if (!scanned) {
+			const item = await ItemModel.findItemByVendor(data);
+			setLastScannedItem(item);
+			setScanned(true);
+			setBasket((oldBasket) => [...oldBasket, item]);
+		}
+	};
+
+	const onContinue = () => {
+		setScanned(false);
 	};
 
 	if (hasPermission === null) {
@@ -79,12 +93,12 @@ export default function CameraScreen({ navigation }) {
 					</Text>
 				</BarCodeScanner>
 
-				{scanned && (
-					<SuccessBuyNotification
-						// title="Сканировать дальше"
-						onContinue={() => setScanned(false)}
-					/>
-				)}
+				<SuccessBuyNotification
+					name={lastScannedItem.name}
+					price={lastScannedItem.price}
+					visible={scanned}
+					onContinue={onContinue}
+				/>
 			</Content>
 			<Footer>
 				<FooterTab>
@@ -94,7 +108,7 @@ export default function CameraScreen({ navigation }) {
 							<Text style={styles.text}>Сканировать</Text>
 						</View>
 					</Button>
-					<Button onPress={() => navigation.navigate("Basket")}>
+					<Button onPress={() => navigation.navigate("Basket", { basket })}>
 						<View style={styles.tab}>
 							<Icon name="basket" />
 							<Text style={styles.text}>В корзину</Text>
