@@ -1,28 +1,28 @@
 {
-  "expo": {
-    "name": "virushack-native",
-    "slug": "virushack-native",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true
-    }
-  }
+	"expo": {
+		"name": "virushack-native",
+		"slug": "virushack-native",
+		"platforms": ["ios", "android", "web"],
+		"version": "1.0.0",
+		"orientation": "portrait",
+		"icon": "./assets/icon.png",
+		"splash": {
+			"image": "./assets/startblock.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#ff6200"
+		},
+		"updates": {
+			"fallbackToCacheTimeout": 0
+		},
+		"assetBundlePatterns": ["**/*"],
+		"android": {
+			"package": "virushack.mobile",
+			"versionCode": 1
+		},
+		"ios": {
+			"bundleIdentifier": "virushack.mobile",
+			"buildNumber": "1.0.0",
+			"supportsTablet": true
+		}
+	}
 }
