@@ -8,6 +8,7 @@ import getTheme from "./native-base-theme/components";
 import StartScreen from "./screens/StartScreen";
 import CameraScreen from "./screens/CameraScreen";
 import BasketScreen from "./screens/BasketScreen";
+import CodeScreen from "./screens/CodeScreen";
 
 const Stack = createStackNavigator();
 
@@ -34,6 +35,7 @@ export default class App extends Component {
 						<Stack.Screen name="Start" component={StartScreen} />
 						<Stack.Screen name="Camera" component={CameraScreen} />
 						<Stack.Screen name="Basket" component={BasketScreen} />
+						<Stack.Screen name="QRCode" component={CodeScreen} />
 					</Stack.Navigator>
 				</StyleProvider>
 			</NavigationContainer>
