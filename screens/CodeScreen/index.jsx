@@ -1,7 +1,7 @@
 import React from "react";
 import { Container, Content, H2 } from "native-base";
 import { Dimensions, Text, View, StyleSheet } from "react-native";
-import QRCode from "react-native-qrcode-svg";
+import QRCode from "react-native-qrcode-generator";
 
 const { height, width } = Dimensions.get("window");
 
@@ -17,8 +17,7 @@ const CodeScreen = ({ route, navigation }) => {
 					<QRCode
 						size={300}
 						color={"black"}
-						value={{ data: route.params.codeData }.toString()}
-						// value="test value"
+						value={JSON.stringify({ data: route.params.codeData })}
 						onError={onError}
 					/>
 				</View>

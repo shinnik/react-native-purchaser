@@ -21,20 +21,21 @@ import {
 	Button,
 } from "native-base";
 import { BarCodeScanner } from "expo-barcode-scanner";
+import { useFocusEffect } from "@react-navigation/native";
 import SuccessBuyNotification from "../../components/SuccessBuyNotification";
 import ItemModel from "../../models/ItemModel";
 
 const { width, height } = Dimensions.get("window");
 const qrSize = width * 0.7;
 
-export default function CameraScreen({ navigation }) {
+export default function CameraScreen({ updateBasket, navigation }) {
 	const [hasPermission, setHasPermission] = useState(null);
 	const [scanned, setScanned] = useState(false);
+	const [renderScanner, setRenderScanner] = useState(false);
 	const [lastScannedItem, setLastScannedItem] = useState({
-		name: "",
-		price: "",
+		name: null,
+		price: null,
 	});
-	const [basket, setBasket] = useState([]);
 
 	useEffect(() => {
 		(async () => {
@@ -43,12 +44,23 @@ export default function CameraScreen({ navigation }) {
 		})();
 	}, []);
 
+	// stop scanning when another screen
+	useFocusEffect(
+		React.useCallback(() => {
+			setRenderScanner(true);
+			return () => {
+				setRenderScanner(false);
+			};
+		}, [])
+	);
+
 	const handleBarCodeScanned = async ({ type, data }) => {
-		setScanned(true);
+		// setScanned(true);
 		const item = await ItemModel.findItemByVendor(data);
+		const restricted = await ItemModel.checkItemRestrictionByVendor(data);
 		if (item) {
 			setLastScannedItem(item);
-			setBasket((oldBasket) => [...oldBasket, item]);
+			updateBasket({ ...item, restricted }, "add");
 		}
 	};
 
@@ -80,26 +92,37 @@ export default function CameraScreen({ navigation }) {
 					height,
 				}}
 			>
-				<BarCodeScanner
-					onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-					style={[StyleSheet.absoluteFill, styles.container]}
-				>
-					<Text style={styles.description}>Отсканируйте покупку</Text>
-					<Image
-						style={styles.qr}
-						source={require("../../assets/img/QR.png")}
-					/>
-					<Text onPress={() => navigation.pop()} style={styles.cancel}>
-						Отменить
-					</Text>
-				</BarCodeScanner>
+				{renderScanner && (
+					<BarCodeScanner
+						onBarCodeScanned={
+							scanned
+								? undefined
+								: (d) => {
+										setScanned(true);
+										handleBarCodeScanned(d);
+								  }
+						}
+						style={[StyleSheet.absoluteFill, styles.container]}
+					>
+						<Text style={styles.description}>Отсканируйте покупку</Text>
+						<Image
+							style={styles.qr}
+							source={require("../../assets/img/QR.png")}
+						/>
+						<Text onPress={() => navigation.pop()} style={styles.cancel}>
+							Отменить
+						</Text>
+					</BarCodeScanner>
+				)}
 
-				<SuccessBuyNotification
-					name={lastScannedItem.name}
-					price={lastScannedItem.price}
-					visible={scanned && lastScannedItem.name !== null}
-					onContinue={onContinue}
-				/>
+				{lastScannedItem.name && (
+					<SuccessBuyNotification
+						name={lastScannedItem.name}
+						price={lastScannedItem.price}
+						visible={scanned}
+						onContinue={onContinue}
+					/>
+				)}
 			</Content>
 			<Footer>
 				<FooterTab>
@@ -109,7 +132,7 @@ export default function CameraScreen({ navigation }) {
 							<Text style={styles.text}>Сканировать</Text>
 						</View>
 					</Button>
-					<Button onPress={() => navigation.navigate("Basket", { basket })}>
+					<Button onPress={() => navigation.navigate("Basket")}>
 						<View style={styles.tab}>
 							<Icon name="basket" />
 							<Text style={styles.text}>В корзину</Text>

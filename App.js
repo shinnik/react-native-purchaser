@@ -15,6 +15,7 @@ const Stack = createStackNavigator();
 export default class App extends Component {
 	state = {
 		isLoaded: false,
+		basket: [],
 	};
 
 	componentDidMount = async () => {
@@ -26,6 +27,21 @@ export default class App extends Component {
 		}
 	};
 
+	updateBasket = (item, action) => {
+		if (action === "add") {
+			this.setState({ basket: [...this.state.basket, item] });
+		}
+		if (action === "remove") {
+			this.setState({
+				basket: [
+					...this.state.basket.filter(
+						(itemToFilter) => itemToFilter.id !== item.id
+					),
+				],
+			});
+		}
+	};
+
 	render() {
 		const { isLoaded } = this.state;
 		return isLoaded ? (
@@ -33,8 +49,20 @@ export default class App extends Component {
 				<StyleProvider style={getTheme(virushackTheme)}>
 					<Stack.Navigator initialRouteName="Start" headerMode="none">
 						<Stack.Screen name="Start" component={StartScreen} />
-						<Stack.Screen name="Camera" component={CameraScreen} />
-						<Stack.Screen name="Basket" component={BasketScreen} />
+						<Stack.Screen name="Camera">
+							{(navProps) => (
+								<CameraScreen updateBasket={this.updateBasket} {...navProps} />
+							)}
+						</Stack.Screen>
+						<Stack.Screen name="Basket">
+							{(navProps) => (
+								<BasketScreen
+									basket={this.state.basket}
+									updateBasket={this.updateBasket}
+									{...navProps}
+								/>
+							)}
+						</Stack.Screen>
 						<Stack.Screen name="QRCode" component={CodeScreen} />
 					</Stack.Navigator>
 				</StyleProvider>

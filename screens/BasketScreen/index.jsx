@@ -18,8 +18,13 @@ import {
 } from "native-base";
 import { View, StyleSheet } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
+// import { CommonActions } from "@react-navigation/native";
 
-const BasketScreen = ({ route, navigation }) => {
+const BasketScreen = ({ basket, updateBasket, navigation }) => {
+	const removeItemFromBasket = (item) => {
+		updateBasket(item, "remove");
+	};
+
 	return (
 		<Container>
 			<Header noLeft>
@@ -31,8 +36,7 @@ const BasketScreen = ({ route, navigation }) => {
 				</Body>
 				<Right>
 					<Text style={styles.text}>
-						Сумма:{" "}
-						{route.params.basket.reduce((sum, next) => sum + next.price, 0)}{" "}
+						Сумма: {basket.reduce((sum, next) => sum + next.price, 0)}{" "}
 					</Text>
 				</Right>
 			</Header>
@@ -40,16 +44,33 @@ const BasketScreen = ({ route, navigation }) => {
 				<Text style={styles.smallText}>
 					На данный момент цены генерируются автоматически
 				</Text>
-				{route.params.basket.length > 0 ? (
+				{basket.length > 0 ? (
 					<ScrollView style={styles.scrollView}>
-						{route.params.basket.map((item) => (
-							<Card>
+						{basket.map((item) => (
+							<Card key={item.id}>
 								<CardItem header>
-									<View style={styles.info}>
-										<Text>{item.name}</Text>
-										<Text style={styles.price}>Цена: {item.price} руб.</Text>
+									<View style={styles.infoAndControls}>
+										<View style={styles.info}>
+											<Text>{item.name}</Text>
+											<Text style={styles.price}>Цена: {item.price} руб.</Text>
+										</View>
+										<Button
+											onPress={() => removeItemFromBasket(item)}
+											iconLeft
+											transparent
+										>
+											<Icon style={styles.deleteIcon} name="trash" />
+										</Button>
 									</View>
 								</CardItem>
+								{item.restricted && (
+									<CardItem footer>
+										<Icon />
+										<Text style={styles.restrictedText}>
+											Нельзя оплатить в кассе самообслуживания
+										</Text>
+									</CardItem>
+								)}
 							</Card>
 						))}
 					</ScrollView>
@@ -58,11 +79,9 @@ const BasketScreen = ({ route, navigation }) => {
 						<Text style={styles.textPlaceholder}>Корзина пуста</Text>
 					</View>
 				)}
-				{route.params.basket.length > 0 && (
+				{basket.length > 0 && (
 					<Button
-						onPress={() =>
-							navigation.navigate("QRCode", { codeData: route.params.basket })
-						}
+						onPress={() => navigation.navigate("QRCode", { codeData: basket })}
 						block
 					>
 						<Text>Завершить покупки</Text>
@@ -92,6 +111,17 @@ const BasketScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
 	scrollView: {
 		marginBottom: 20,
+	},
+	deleteIcon: {
+		paddingRight: 10,
+		color: "grey",
+	},
+	infoAndControls: {
+		display: "flex",
+		// flex: 0.3,
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
 	},
 	head: {
 		flex: 1,
@@ -125,6 +155,10 @@ const styles = StyleSheet.create({
 	},
 	smallText: {
 		color: "grey",
+		fontSize: 12,
+	},
+	restrictedText: {
+		color: "red",
 		fontSize: 12,
 	},
 	price: {
